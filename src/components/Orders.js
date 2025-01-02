@@ -39,19 +39,20 @@ const OrdersPage = () => {
     });
   };
 
-  // const formatCurrency = (amount) => {
-  //   return new Intl.NumberFormat('en-IN', {
-  //     style: 'currency',
-  //     currency: 'INR',
-  //     maximumFractionDigits: 0
-  //   }).format(amount);
-  // };
+  const formatQuality = (quality) => {
+    switch (quality) {
+      case 0: return "Single Filter";
+      case 1: return "Double Filter";
+      case 2: return "Mixed Filter";
+      default: return "unknown";
+    }
+  };
 
   const renderOrdersTable = (orders) => (
     <table className="w-full">
       <thead className="bg-gray-50">
         <tr>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Order ID
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -67,6 +68,9 @@ const OrdersPage = () => {
             Quantity
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            Region
+          </th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Status
           </th>
         </tr>
@@ -74,7 +78,7 @@ const OrdersPage = () => {
       <tbody className="bg-white divide-y divide-gray-200">
         {orders.map((order) => (
           <tr key={order.id}>
-            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+            <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
               #{order.orderID}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -84,10 +88,13 @@ const OrdersPage = () => {
               {formatDate(order.created_at)}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {order.quality || 'N/A'}
+              {formatQuality(order.quality)}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               {(order.quantity || 0)}
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {order.region || 'N/A'}
             </td>
             <td className="px-6 py-4 whitespace-nowrap">
               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
