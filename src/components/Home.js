@@ -45,7 +45,7 @@ const RupeeIcon = () => (
         {/* Recent Orders */}
         <div className="bg-white rounded-lg shadow">
           <div className="p-6 border-b border-gray-200">
-            <h3 className="text-xl font-semibold text-gray-800">Recent Orders</h3>
+            <h3 className="text-xl font-semibold text-gray-800">Orders Status</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
