@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import DialogueBox from './user_dialogueBox'; // Import the dialogue box component
 
 const UsersPage = () => {
   const [buyerData, setBuyerData] = useState([]);
   const [sellerData, setSellerData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("buyer");
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,6 +34,14 @@ const UsersPage = () => {
 
     fetchData();
   }, []);
+
+  const handleRowClick = (user) => {
+    setSelectedUser(user);
+  };
+
+  const handleCloseDialogue = () => {
+    setSelectedUser(null);
+  };
 
   const renderUsersTable = (data) => (
     <table className="w-full">
@@ -62,7 +72,7 @@ const UsersPage = () => {
       </thead>
       <tbody className="bg-white divide-y divide-gray-200">
         {data.map((user) => ( 
-          <tr key={user.id}>
+          <tr key={user.id} onClick={() => handleRowClick(user)} className="cursor-pointer">
             <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
               #{user.id}
             </td>
@@ -147,6 +157,7 @@ const UsersPage = () => {
           </div>
         )}
       </div>
+      {selectedUser && <DialogueBox user={selectedUser} onClose={handleCloseDialogue} />}
     </div>
   );
 };
