@@ -1,24 +1,36 @@
 import { useState, useEffect } from 'react';
+import OrderDialogueBox from './order_dialogueBox';
 
 const OrdersPage = () => {
   const [activeOrders, setActiveOrders] = useState([]);
-  const [pastOrders, setPastOrders] = useState([]);
+  const [pendingOrders, setPendingOrders] = useState([]);
+  const [closedOrders, setClosedOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("active");
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const [activeRes, pastRes] = await Promise.all([
-          fetch('http://localhost:1234/orders/active'),
-          fetch('http://localhost:1234/orders/past')
-        ]);
+        const response = await fetch('http://localhost:1234/api/rfqs');
+        const data = await response.json();
 
-        const activeData = await activeRes.json();
-        const pastData = await pastRes.json();
+        // Group orders by status
+        const grouped = data.data.reduce((acc, order) => {
+          if (order.status === 'active') {
+            acc.active.push(order);
+          } else if (order.status === 'pending') {
+            acc.pending.push(order);
+          } else if (order.status === 'closed') {
+            acc.closed.push(order);
+          }
+          return acc;
+        }, { active: [], pending: [], closed: [] });
 
-        setActiveOrders(activeData.data || []);
-        setPastOrders(pastData.data || []);
+        // Sort each group by date (newest first)
+        setActiveOrders(grouped.active.reverse());
+        setPendingOrders(grouped.pending.reverse());
+        setClosedOrders(grouped.closed.reverse());
         setLoading(false);
       } catch (error) {
         console.error('Error fetching orders:', error);
@@ -39,13 +51,21 @@ const OrdersPage = () => {
     });
   };
 
-  const formatQuality = (quality) => {
-    switch (quality) {
-      case 0: return "Single Filter";
-      case 1: return "Double Filter";
-      case 2: return "Mixed Filter";
-      default: return "unknown";
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-green-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'closed':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const handleRowClick = (order) => {
+    setSelectedOrder(order);
   };
 
   const renderOrdersTable = (orders) => (
@@ -56,13 +76,13 @@ const OrdersPage = () => {
             Order ID
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Username
+            Buyer ID
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Date
+            Loading Date
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Quality
+            Grade
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
             Quantity
@@ -77,29 +97,32 @@ const OrdersPage = () => {
       </thead>
       <tbody className="bg-white divide-y divide-gray-200">
         {orders.map((order) => (
-          <tr key={order.id}>
+          <tr 
+            key={order.id}
+            onClick={() => handleRowClick(order)}
+            className="hover:bg-gray-50 cursor-pointer"
+          >
             <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-              #{order.orderID}
+              #{order.id.slice(0, 8)}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {order.userName || 'N/A'}
+              #{order.buyer_id.slice(0, 8)}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {formatDate(order.created_at)}
+              {formatDate(order.loading_date)}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {formatQuality(order.quality)}
+              {order.grade}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {(order.quantity || 0)}
+              {order.quantity}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {order.region || 'N/A'}
+              {order.region}
             </td>
             <td className="px-6 py-4 whitespace-nowrap">
-              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                ${order.status ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                {order.status ? 'Active' : 'Completed'}
+              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>
+                {order.status}
               </span>
             </td>
           </tr>
@@ -131,17 +154,27 @@ const OrdersPage = () => {
                     : "text-gray-600 hover:bg-gray-200"
                 }`}
               >
-                Active Orders ({activeOrders.length})
+                Active ({activeOrders.length})
               </button>
               <button
-                onClick={() => setActiveTab("past")}
+                onClick={() => setActiveTab("pending")}
                 className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
-                  activeTab === "past"
+                  activeTab === "pending"
                     ? "bg-white text-gray-900 shadow-sm"
                     : "text-gray-600 hover:bg-gray-200"
                 }`}
               >
-                Past Orders ({pastOrders.length})
+                Pending ({pendingOrders.length})
+              </button>
+              <button
+                onClick={() => setActiveTab("closed")}
+                className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
+                  activeTab === "closed"
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                Closed ({closedOrders.length})
               </button>
             </div>
           </div>
@@ -157,14 +190,29 @@ const OrdersPage = () => {
           )
         )}
         
-        {activeTab === "past" && (
-          pastOrders.length > 0 ? (
-            renderOrdersTable(pastOrders)
+        {activeTab === "pending" && (
+          pendingOrders.length > 0 ? (
+            renderOrdersTable(pendingOrders)
           ) : (
-            <div className="text-center py-6 text-gray-500">No past orders found</div>
+            <div className="text-center py-6 text-gray-500">No pending orders found</div>
+          )
+        )}
+        
+        {activeTab === "closed" && (
+          closedOrders.length > 0 ? (
+            renderOrdersTable(closedOrders)
+          ) : (
+            <div className="text-center py-6 text-gray-500">No closed orders found</div>
           )
         )}
       </div>
+
+      {selectedOrder && (
+        <OrderDialogueBox
+          order={selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+        />
+      )}
     </div>
   );
 };

@@ -3,14 +3,16 @@ import {
   Home,
   Package,
   Settings,
-  HelpCircle
+  HelpCircle,
+  Gavel,
+  User,
 } from 'lucide-react';
 
 import HomePage from './Home';
 import OrdersPage from './Orders';
 import SettingsPage from './Settings';
 import UsersPage from './Users';
-
+import BidsPage from './Bids';
 // Settings Page Component
 
 // Help Page Component
@@ -32,8 +34,8 @@ const Dashboard = () => {
         return <OrdersPage />;
       case 'Users':
         return <UsersPage />;
-      case 'Settings':
-        return <SettingsPage />;
+      case 'Bids':
+        return <BidsPage />;
       case 'Help':
         return <HelpPage />;
       default:
@@ -43,9 +45,9 @@ const Dashboard = () => {
 
   const navItems = [
     { name: 'Home', icon: <Home size={20} /> },
-    { name: 'Users', icon: <Settings size={20} /> },
+    { name: 'Users', icon: <User size={20} /> },
     { name: 'Orders', icon: <Package size={20} /> },
-    { name: 'Settings', icon: <Settings size={20} /> },
+    { name: 'Bids', icon: <Gavel size={20} /> },
     { name: 'Help', icon: <HelpCircle size={20} /> },
   ];
 

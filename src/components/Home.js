@@ -27,10 +27,10 @@ const HomePage = () => {
     const fetchData = async () => {
       try {
         const [buyersRes, sellersRes, activeOrdersRes, pastOrdersRes] = await Promise.all([
-          fetch(`${backendLink}/buyers/count`),
-          fetch(`${backendLink}/sellers/count`),
-          fetch(`${backendLink}/orders/active/count`),
-          fetch(`${backendLink}/orders/past/count`),
+          fetch(`${backendLink}/api/buyers/count`),
+          fetch(`${backendLink}/api/sellers/count`),
+          fetch(`${backendLink}/api/rfqs/count/active`),
+          fetch(`${backendLink}/api/rfqs/count/ended`),
         ]);
 
         const buyers = await buyersRes.json();
@@ -96,10 +96,12 @@ const HomePage = () => {
         {metrics.map((metric) => (
           <div key={metric.title} className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between mb-4">
-              <div>{metric.icon}</div>
+              <div className="flex items-center gap-3">
+                <div>{metric.icon}</div>
+                <h3 className="text-gray-600 text-lg font-semibold">{metric.title}</h3>
+              </div>
               <span className="text-sm text-green-600 font-semibold">{metric.trend}</span>
             </div>
-            <h3 className="text-gray-600 text-sm">{metric.title}</h3>
             <p className="text-2xl font-bold text-gray-800">{metric.value}</p>
           </div>
         ))}

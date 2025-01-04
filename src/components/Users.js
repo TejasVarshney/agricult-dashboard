@@ -1,39 +1,33 @@
-import { useState, useEffect } from 'react';
-import DialogueBox from './user_dialogueBox'; // Import the dialogue box component
+import { useState } from 'react';
+import { useApi } from '../hooks/useApi';
+import { apiService } from '../services/api';
+import { LoadingState } from './common/LoadingState';
+import { ErrorState } from './common/ErrorState';
+import DialogueBox from './user_dialogueBox';
 
 const UsersPage = () => {
-  const [buyerData, setBuyerData] = useState([]);
-  const [sellerData, setSellerData] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("buyer");
   const [selectedUser, setSelectedUser] = useState(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [buyerRes, sellerRes] = await Promise.all([
-          fetch('http://localhost:1234/buyers'),
-          fetch('http://localhost:1234/sellers')  // Changed to plural for consistency
-        ]);
+  const { 
+    data: buyerData, 
+    loading: buyerLoading, 
+    error: buyerError 
+  } = useApi(apiService.users.getBuyers);
 
-        if (!buyerRes.ok || !sellerRes.ok) {
-          throw new Error('Failed to fetch data');
-        }
+  const { 
+    data: sellerData, 
+    loading: sellerLoading, 
+    error: sellerError 
+  } = useApi(apiService.users.getSellers);
 
-        const buyersData = await buyerRes.json();
-        const sellersData = await sellerRes.json();
+  if (buyerLoading || sellerLoading) {
+    return <LoadingState />;
+  }
 
-        setBuyerData(buyersData.data || []);
-        setSellerData(sellersData.data || []);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  if (buyerError || sellerError) {
+    return <ErrorState message={buyerError || sellerError} />;
+  }
 
   const handleRowClick = (user) => {
     setSelectedUser(user);
@@ -51,51 +45,36 @@ const UsersPage = () => {
             User ID
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Name
+            {activeTab === 'buyer' ? 'Full Name' : 'License Number'}
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            {activeTab === 'buyer' ? 'Business Name' : 'License No.'}
+            {activeTab === 'buyer' ? 'Business Name' : 'Email'}
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Email
+            Phone
           </th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Phone no.
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Location
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Status
+            {activeTab === 'buyer' ? 'Location' : 'Region'}
           </th>
         </tr>
       </thead>
       <tbody className="bg-white divide-y divide-gray-200">
-        {data.map((user) => ( 
+        {data.map((user) => (
           <tr key={user.id} onClick={() => handleRowClick(user)} className="cursor-pointer">
             <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-              #{user.id}
+              #{user.id.slice(0, 8)}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {user.fullName || user.userName || 'N/A'}
+              {activeTab === 'buyer' ? user.full_name : user.license_number}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {user.businessName || user.license || 'N/A'}
+              {activeTab === 'buyer' ? user.business_name : user.email || 'N/A'}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {user.email || 'N/A'}
+              {user.phone}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {user.phoneNumber || 'N/A'}
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {user.location || user.region || 'N/A'}
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                ${user.isOnline ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                {user.isOnline ? 'Online' : 'Offline'}
-              </span>
+              {activeTab === 'buyer' ? user.location : user.region}
             </td>
           </tr>
         ))}
@@ -103,16 +82,7 @@ const UsersPage = () => {
     </table>
   );
 
-  if (loading) {
-    return (
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="text-center text-gray-500">Loading data...</div>
-      </div>
-    );
-  }
-  console.log(activeTab)
   const currentData = activeTab === "buyer" ? buyerData : sellerData;
-//   const dataCount = activeTab === "buyer" ? buyerData.length : sellerData.length;
 
   return (
     <div className="bg-white rounded-lg shadow">

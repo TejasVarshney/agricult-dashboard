@@ -1,130 +1,41 @@
 import express from "express";
 import cors from "cors";
-import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
+import buyerRoutes from "./routes/buyerRoutes.js";
+import sellerRoutes from "./routes/sellerRoutes.js";
+import rfqRoutes from "./routes/rfqRoutes.js";
+import quoteRoutes from "./routes/quoteRoutes.js";
 
+// Initialize environment variables
 dotenv.config();
 
-const SUPABASE_URL = "https://pojuqqnftsunpiutlyrn.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvanVxcW5mdHN1bnBpdXRseXJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ2ODAwOTIsImV4cCI6MjA1MDI1NjA5Mn0.0QASIiNcOib_pClL7XMi45_MoK3cMNjLbmvfhp982UQ";
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const app = express();
-const port = 1234;
+const port = process.env.PORT || 1234;
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-app.get("/buyers/count", async (req, res) => {
-  try {
-    const { count, error } = await supabase
-      .from("USER_BUYERS")
-      .select("*", { count: "exact", head: true });
+// Routes
+app.use("/api/buyers", buyerRoutes);
+app.use("/api/sellers", sellerRoutes);
+app.use("/api/rfqs", rfqRoutes);
+app.use("/api/quotes", quoteRoutes);
 
-    if (error) throw error;
-    res.json({ count });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: "Something went wrong!" });
 });
 
-app.get("/sellers/count", async (req, res) => {
-  try {
-    const { count, error } = await supabase
-      .from("USER_SELLER")
-      .select("*", { count: "exact", head: true });
-
-    if (error) throw error;
-    res.json({ count });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get("/orders/active/count", async (req, res) => {
-  try {
-    const { count, error } = await supabase
-      .from("ORDERS")
-      .select("*", { count: "exact", head: true })
-      .eq("status", true);
-
-    if (error) throw error;
-    res.json({ count });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get("/orders/past/count", async (req, res) => {
-  try {
-    const { count, error } = await supabase
-      .from("ORDERS")
-      .select("*", { count: "exact", head: true })
-      .eq("status", false);
-
-    if (error) throw error;
-    res.json({ count });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get("/orders/active", async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from("ORDERS")
-      .select("*")
-      .eq("status", true);
-
-    if (error) throw error;
-    res.json({ data });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get("/orders/past", async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from("ORDERS")
-      .select("*")
-      .eq("status", false);
-
-    if (error) throw error;
-    res.json({ data });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
-app.get("/buyers", async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from("USER_BUYERS")
-      .select("*");
-
-    if (error) throw error;
-    res.json({ data });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
-app.get("/sellers", async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from("USER_SELLER")
-      .select("*");
-
-    if (error) throw error;
-    res.json({ data });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
+// Start server
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
+});
+
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (err) => {
+  console.log("UNHANDLED REJECTION! 💥 Shutting down...");
+  console.log(err.name, err.message);
+  process.exit(1);
 });
