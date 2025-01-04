@@ -61,31 +61,31 @@ const HomePage = () => {
       title: 'Revenue', 
       value: '₹4,32,000', // Note: You'll need to add a revenue endpoint to your backend
       icon: <RupeeIcon />, 
-      trend: '+12%'  // You'll need to calculate this
+      // trend: '+12%'  // You'll need to calculate this
     },
     { 
       title: 'Total Orders', 
       value: loading ? '...' : data.totalOrders.toLocaleString(), 
       icon: <ShoppingCart className="text-blue-600" size={24} />, 
-      trend: '+5%'  // You'll need to calculate this
+      // trend: '+5%'  // You'll need to calculate this
     },
     { 
       title: 'Total Users', 
       value: loading ? '...' : data.totalUsers.toLocaleString(), 
       icon: <Users className="text-purple-600" size={24} />, 
-      trend: '+8%'  // You'll need to calculate this
+      // trend: '+8%'  // You'll need to calculate this
     },
     { 
       title: 'Buyers', 
       value: loading ? '...' : data.buyers.toLocaleString(), 
       icon: <User className="text-orange-600" size={24} />, 
-      trend: '+15%'  // You'll need to calculate this
+      // trend: '+15%'  // You'll need to calculate this
     },
     { 
       title: 'Sellers', 
       value: loading ? '...' : data.sellers.toLocaleString(), 
       icon: <Store className="text-indigo-600" size={24} />, 
-      trend: '+3%'  // You'll need to calculate this
+      // trend: '+3%'  // You'll need to calculate this
     }
   ];
 

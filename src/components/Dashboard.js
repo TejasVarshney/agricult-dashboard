@@ -9,6 +9,7 @@ import {
 import HomePage from './Home';
 import OrdersPage from './Orders';
 import SettingsPage from './Settings';
+import UsersPage from './Users';
 
 // Settings Page Component
 
@@ -29,6 +30,8 @@ const Dashboard = () => {
         return <HomePage />;
       case 'Orders':
         return <OrdersPage />;
+      case 'Users':
+        return <UsersPage />;
       case 'Settings':
         return <SettingsPage />;
       case 'Help':
@@ -40,6 +43,7 @@ const Dashboard = () => {
 
   const navItems = [
     { name: 'Home', icon: <Home size={20} /> },
+    { name: 'Users', icon: <Settings size={20} /> },
     { name: 'Orders', icon: <Package size={20} /> },
     { name: 'Settings', icon: <Settings size={20} /> },
     { name: 'Help', icon: <HelpCircle size={20} /> },
