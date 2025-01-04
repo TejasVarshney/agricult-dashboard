@@ -1,101 +1,80 @@
-import React from 'react';
-import { DialogBox } from './common/DialogBox';
-import { formatDate, formatCurrency } from '../utils/formatters';
+import { useState } from 'react';
+import { X } from 'lucide-react';
+import SellerProfileDialog from './SellerProfileDialog';
 
 const BidDialogueBox = ({ bid, onClose }) => {
-  if (!bid) return null;
+  const [showSellerProfile, setShowSellerProfile] = useState(false);
 
-  const InfoField = ({ label, value }) => (
-    <div className="mb-4">
-      <dt className="text-sm font-medium text-gray-500">{label}</dt>
-      <dd className="mt-1 text-sm text-gray-900">{value}</dd>
-    </div>
-  );
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR'
+    }).format(amount);
+  };
 
   return (
-    <DialogBox
-      isOpen={!!bid}
-      onClose={onClose}
-      title="Bid Details"
-    >
-      <div className="bg-gray-50 px-4 py-5 sm:rounded-lg sm:p-6">
-        <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
-          <InfoField 
-            label="Bid ID" 
-            value={`#${bid.id.slice(0, 8)}`} 
-          />
-          
-          <InfoField 
-            label="RFQ ID" 
-            value={`#${bid.rfq_id.slice(0, 8)}`} 
-          />
-          
-          <InfoField 
-            label="Price per Ton" 
-            value={formatCurrency(bid.price_per_ton)} 
-          />
-          
-          <InfoField 
-            label="Total Price" 
-            value={formatCurrency(bid.total_price)} 
-          />
-          
-          <InfoField 
-            label="Status" 
-            value={
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                ${bid.status === 'accepted' ? 'bg-green-100 text-green-800' : 
-                  bid.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                  'bg-red-100 text-red-800'}`}>
-                {bid.status}
-              </span>
-            }
-          />
-          
-          <InfoField 
-            label="Loading Date" 
-            value={formatDate(bid.loading_date)} 
-          />
-          
-          <InfoField 
-            label="Created At" 
-            value={formatDate(bid.created_at)} 
-          />
-          
-          <InfoField 
-            label="Updated At" 
-            value={formatDate(bid.updated_at)} 
-          />
-        </dl>
+    <>
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
+        <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Bid Details</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <X size={24} />
+            </button>
+          </div>
 
-        {bid.photos && bid.photos.length > 0 && (
-          <div className="mt-6">
-            <h4 className="text-sm font-medium text-gray-500 mb-3">Photos</h4>
-            <div className="grid grid-cols-3 gap-4">
-              {bid.photos.map((photo, index) => (
-                <div key={index} className="relative group">
-                  <img 
-                    src={photo}
-                    alt={`Bid photo ${index + 1}`}
-                    className="h-24 w-24 rounded-lg object-cover ring-1 ring-gray-200 group-hover:ring-2 group-hover:ring-indigo-500"
-                  />
-                </div>
-              ))}
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-gray-500">Bid ID</label>
+              <p className="text-gray-900">#{bid.id}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-500">Seller ID</label>
+              <p 
+                className="text-blue-600 cursor-pointer hover:text-blue-800"
+                onClick={() => setShowSellerProfile(true)}
+              >
+                #{bid.seller_id}
+              </p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-500">RFQ ID</label>
+              <p className="text-gray-900">#{bid.rfq_id}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-500">Price</label>
+              <p className="text-gray-900">{formatCurrency(bid.price)}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-500">Submitted Date</label>
+              <p className="text-gray-900">{formatDate(bid.created_at)}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-500">Status</label>
+              <p className="text-gray-900 capitalize">{bid.status}</p>
             </div>
           </div>
-        )}
+        </div>
       </div>
 
-      <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-        <button
-          type="button"
-          onClick={onClose}
-          className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
-        >
-          Close
-        </button>
-      </div>
-    </DialogBox>
+      {showSellerProfile && (
+        <SellerProfileDialog
+          sellerId={bid.seller_id}
+          onClose={() => setShowSellerProfile(false)}
+        />
+      )}
+    </>
   );
 };
 

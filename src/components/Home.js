@@ -26,24 +26,23 @@ const HomePage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [buyersRes, sellersRes, activeOrdersRes, pastOrdersRes] = await Promise.all([
+        const [buyersRes, sellersRes, activeOrdersRes, totalOrdersRes] = await Promise.all([
           fetch(`${backendLink}/api/buyers/count`),
           fetch(`${backendLink}/api/sellers/count`),
           fetch(`${backendLink}/api/rfqs/count/active`),
-          fetch(`${backendLink}/api/rfqs/count/ended`),
+          fetch(`${backendLink}/api/rfqs/count/total`),
         ]);
 
         const buyers = await buyersRes.json();
         const sellers = await sellersRes.json();
         const activeOrders = await activeOrdersRes.json();
-        const pastOrders = await pastOrdersRes.json();
+        const totalOrders = await totalOrdersRes.json();
 
         setData({
           buyers: buyers.count || 0,
           sellers: sellers.count || 0,
           activeOrders: activeOrders.count || 0,
-          pastOrders: pastOrders.count || 0,
-          totalOrders: (activeOrders.count || 0) + (pastOrders.count || 0),
+          totalOrders: totalOrders.count || 0,
           totalUsers: (buyers.count || 0) + (sellers.count || 0),
         });
         setLoading(false);

@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import OrderDialogueBox from './order_dialogueBox';
 
 const OrdersPage = () => {
+  const [allOrders, setAllOrders] = useState([]);
   const [activeOrders, setActiveOrders] = useState([]);
   const [pendingOrders, setPendingOrders] = useState([]);
   const [closedOrders, setClosedOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("active");
+  const [activeTab, setActiveTab] = useState("all");
   const [selectedOrder, setSelectedOrder] = useState(null);
 
   useEffect(() => {
@@ -14,6 +15,9 @@ const OrdersPage = () => {
       try {
         const response = await fetch('http://localhost:1234/api/rfqs');
         const data = await response.json();
+
+        // Store all orders
+        setAllOrders(data.data.reverse());
 
         // Group orders by status
         const grouped = data.data.reduce((acc, order) => {
@@ -45,9 +49,7 @@ const OrdersPage = () => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      day: 'numeric'
     });
   };
 
@@ -147,6 +149,16 @@ const OrdersPage = () => {
           <div className="inline-flex h-10 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
             <div className="flex items-center gap-1 rounded-md bg-gray-100 p-1">
               <button
+                onClick={() => setActiveTab("all")}
+                className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
+                  activeTab === "all"
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                All ({allOrders.length})
+              </button>
+              <button
                 onClick={() => setActiveTab("active")}
                 className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
                   activeTab === "active"
@@ -182,6 +194,14 @@ const OrdersPage = () => {
       </div>
       
       <div className="overflow-x-auto">
+        {activeTab === "all" && (
+          allOrders.length > 0 ? (
+            renderOrdersTable(allOrders)
+          ) : (
+            <div className="text-center py-6 text-gray-500">No orders found</div>
+          )
+        )}
+        
         {activeTab === "active" && (
           activeOrders.length > 0 ? (
             renderOrdersTable(activeOrders)

@@ -6,6 +6,7 @@ import {
   getTotalRfqsCount,
   createRfq,
   deleteRfq,
+  getRfqById,
 } from "../controllers/rfqController.js";
 
 const router = express.Router();
@@ -15,6 +16,7 @@ router.get("/", getAllRfqs);
 router.get("/count/active", getActiveRfqsCount);
 router.get("/count/ended", getEndedRfqsCount);
 router.get("/count/total", getTotalRfqsCount);
+router.get("/:id", getRfqById);
 
 // Post routes
 router.post("/", createRfq);

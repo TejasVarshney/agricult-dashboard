@@ -87,4 +87,23 @@ export const deleteRfq = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+};
+
+export const getRfqById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase
+      .from("rfqs")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) throw error;
+    if (!data) {
+      return res.status(404).json({ error: "RFQ not found" });
+    }
+    res.json({ data });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 }; 
