@@ -1,83 +1,84 @@
-import { useState } from 'react';
+import React from 'react';
+import { DialogBox } from './common/DialogBox';
+import { formatDate } from '../utils/formatters';
 
 const OrderDialogueBox = ({ order, onClose }) => {
   if (!order) return null;
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+  const InfoField = ({ label, value }) => (
+    <div className="mb-4">
+      <dt className="text-sm font-medium text-gray-500">{label}</dt>
+      <dd className="mt-1 text-sm text-gray-900">{value}</dd>
+    </div>
+  );
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Order Details</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            ✕
-          </button>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-gray-500">Order ID</p>
-            <p className="font-medium">#{order.id.slice(0, 8)}</p>
-          </div>
+    <DialogBox
+      isOpen={!!order}
+      onClose={onClose}
+      title="Order Details"
+    >
+      <div className="bg-gray-50 px-4 py-5 sm:rounded-lg sm:p-6">
+        <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+          <InfoField 
+            label="Order ID" 
+            value={`#${order.id.slice(0, 8)}`} 
+          />
           
-          <div>
-            <p className="text-sm text-gray-500">Buyer ID</p>
-            <p className="font-medium">#{order.buyer_id.slice(0, 8)}</p>
-          </div>
+          <InfoField 
+            label="Buyer ID" 
+            value={`#${order.buyer_id.slice(0, 8)}`} 
+          />
           
-          <div>
-            <p className="text-sm text-gray-500">Quantity</p>
-            <p className="font-medium">{order.quantity}</p>
-          </div>
+          <InfoField 
+            label="Quantity" 
+            value={order.quantity} 
+          />
           
-          <div>
-            <p className="text-sm text-gray-500">Grade</p>
-            <p className="font-medium">{order.grade}</p>
-          </div>
+          <InfoField 
+            label="Grade" 
+            value={order.grade} 
+          />
           
-          <div>
-            <p className="text-sm text-gray-500">Region</p>
-            <p className="font-medium">{order.region}</p>
-          </div>
+          <InfoField 
+            label="Region" 
+            value={order.region} 
+          />
           
-          <div>
-            <p className="text-sm text-gray-500">Status</p>
-            <p className="font-medium capitalize">{order.status}</p>
-          </div>
+          <InfoField 
+            label="Status" 
+            value={
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                ${order.status === 'active' ? 'bg-green-100 text-green-800' : 
+                  order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                  'bg-gray-100 text-gray-800'}`}>
+                {order.status}
+              </span>
+            }
+          />
           
-          <div>
-            <p className="text-sm text-gray-500">Loading Date</p>
-            <p className="font-medium">{formatDate(order.loading_date)}</p>
-          </div>
+          <InfoField 
+            label="Loading Date" 
+            value={formatDate(order.loading_date)} 
+          />
           
-          <div>
-            <p className="text-sm text-gray-500">Created At</p>
-            <p className="font-medium">{formatDate(order.created_at)}</p>
-          </div>
-        </div>
-
-        <div className="mt-6 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
-          >
-            Close
-          </button>
-        </div>
+          <InfoField 
+            label="Created At" 
+            value={formatDate(order.created_at)} 
+          />
+        </dl>
       </div>
-    </div>
+
+      <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+        >
+          Close
+        </button>
+      </div>
+    </DialogBox>
   );
 };
 

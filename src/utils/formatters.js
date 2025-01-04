@@ -10,4 +10,11 @@ export const formatDate = (dateString) => {
 
 export const truncateId = (id, length = 8) => {
   return id ? `#${id.slice(0, length)}` : 'N/A';
+};
+
+export const formatCurrency = (amount) => {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR'
+  }).format(amount);
 }; 

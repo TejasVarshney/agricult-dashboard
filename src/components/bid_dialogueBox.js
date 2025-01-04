@@ -1,102 +1,101 @@
+import React from 'react';
+import { DialogBox } from './common/DialogBox';
+import { formatDate, formatCurrency } from '../utils/formatters';
+
 const BidDialogueBox = ({ bid, onClose }) => {
   if (!bid) return null;
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR'
-    }).format(amount);
-  };
+  const InfoField = ({ label, value }) => (
+    <div className="mb-4">
+      <dt className="text-sm font-medium text-gray-500">{label}</dt>
+      <dd className="mt-1 text-sm text-gray-900">{value}</dd>
+    </div>
+  );
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Bid Details</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            ✕
-          </button>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm text-gray-500">Bid ID</p>
-            <p className="font-medium">#{bid.id.slice(0, 8)}</p>
-          </div>
+    <DialogBox
+      isOpen={!!bid}
+      onClose={onClose}
+      title="Bid Details"
+    >
+      <div className="bg-gray-50 px-4 py-5 sm:rounded-lg sm:p-6">
+        <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+          <InfoField 
+            label="Bid ID" 
+            value={`#${bid.id.slice(0, 8)}`} 
+          />
           
-          <div>
-            <p className="text-sm text-gray-500">RFQ ID</p>
-            <p className="font-medium">#{bid.rfq_id.slice(0, 8)}</p>
-          </div>
+          <InfoField 
+            label="RFQ ID" 
+            value={`#${bid.rfq_id.slice(0, 8)}`} 
+          />
           
-          <div>
-            <p className="text-sm text-gray-500">Price per Ton</p>
-            <p className="font-medium">{formatCurrency(bid.price_per_ton)}</p>
-          </div>
+          <InfoField 
+            label="Price per Ton" 
+            value={formatCurrency(bid.price_per_ton)} 
+          />
           
-          <div>
-            <p className="text-sm text-gray-500">Total Price</p>
-            <p className="font-medium">{formatCurrency(bid.total_price)}</p>
-          </div>
+          <InfoField 
+            label="Total Price" 
+            value={formatCurrency(bid.total_price)} 
+          />
           
-          <div>
-            <p className="text-sm text-gray-500">Status</p>
-            <p className="font-medium capitalize">{bid.status}</p>
-          </div>
+          <InfoField 
+            label="Status" 
+            value={
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                ${bid.status === 'accepted' ? 'bg-green-100 text-green-800' : 
+                  bid.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                  'bg-red-100 text-red-800'}`}>
+                {bid.status}
+              </span>
+            }
+          />
           
-          <div>
-            <p className="text-sm text-gray-500">Loading Date</p>
-            <p className="font-medium">{formatDate(bid.loading_date)}</p>
-          </div>
+          <InfoField 
+            label="Loading Date" 
+            value={formatDate(bid.loading_date)} 
+          />
           
-          <div>
-            <p className="text-sm text-gray-500">Created At</p>
-            <p className="font-medium">{formatDate(bid.created_at)}</p>
-          </div>
+          <InfoField 
+            label="Created At" 
+            value={formatDate(bid.created_at)} 
+          />
           
-          <div>
-            <p className="text-sm text-gray-500">Updated At</p>
-            <p className="font-medium">{formatDate(bid.updated_at)}</p>
-          </div>
-        </div>
+          <InfoField 
+            label="Updated At" 
+            value={formatDate(bid.updated_at)} 
+          />
+        </dl>
 
         {bid.photos && bid.photos.length > 0 && (
-          <div className="mt-4">
-            <p className="text-sm text-gray-500 mb-2">Photos</p>
-            <div className="flex flex-wrap gap-2">
+          <div className="mt-6">
+            <h4 className="text-sm font-medium text-gray-500 mb-3">Photos</h4>
+            <div className="grid grid-cols-3 gap-4">
               {bid.photos.map((photo, index) => (
-                <img 
-                  key={index}
-                  src={photo}
-                  alt={`Bid photo ${index + 1}`}
-                  className="w-24 h-24 object-cover rounded-lg"
-                />
+                <div key={index} className="relative group">
+                  <img 
+                    src={photo}
+                    alt={`Bid photo ${index + 1}`}
+                    className="h-24 w-24 rounded-lg object-cover ring-1 ring-gray-200 group-hover:ring-2 group-hover:ring-indigo-500"
+                  />
+                </div>
               ))}
             </div>
           </div>
         )}
+      </div>
 
-        <button 
+      <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+        <button
+          type="button"
           onClick={onClose}
-          className="mt-6 w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+          className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
         >
           Close
         </button>
       </div>
-    </div>
+    </DialogBox>
   );
 };
 
