@@ -1,135 +1,157 @@
-import { useState } from 'react';
-import { useApi } from '../hooks/useApi';
-import { apiService } from '../services/api';
-import { LoadingState } from './common/LoadingState';
-import { ErrorState } from './common/ErrorState';
-import DialogueBox from './user_dialogueBox';
+import { useState, useEffect } from 'react';
+import { userService } from '../services/api';
+import { Users as UsersIcon, MapPin, Mail, Phone, Building2 } from 'lucide-react';
 
-const UsersPage = () => {
-  const [activeTab, setActiveTab] = useState("buyer");
-  const [selectedUser, setSelectedUser] = useState(null);
+const UserCard = ({ user, type }) => (
+  <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-all">
+    <div className="flex items-center space-x-4">
+      {/* Avatar */}
+      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+        <span className="text-blue-600 text-xl font-bold">
+          {(user.business_name || user.name || 'NA').charAt(0).toUpperCase()}
+        </span>
+      </div>
 
-  const { 
-    data: buyerData, 
-    loading: buyerLoading, 
-    error: buyerError 
-  } = useApi(apiService.users.getBuyers);
-
-  const { 
-    data: sellerData, 
-    loading: sellerLoading, 
-    error: sellerError 
-  } = useApi(apiService.users.getSellers);
-
-  if (buyerLoading || sellerLoading) {
-    return <LoadingState />;
-  }
-
-  if (buyerError || sellerError) {
-    return <ErrorState message={buyerError || sellerError} />;
-  }
-
-  const handleRowClick = (user) => {
-    setSelectedUser(user);
-  };
-
-  const handleCloseDialogue = () => {
-    setSelectedUser(null);
-  };
-
-  const renderUsersTable = (data) => (
-    <table className="w-full">
-      <thead className="bg-gray-50">
-        <tr>
-          <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            User ID
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            {activeTab === 'buyer' ? 'Full Name' : 'License Number'}
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            {activeTab === 'buyer' ? 'Business Name' : 'Email'}
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            Phone
-          </th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-            {activeTab === 'buyer' ? 'Location' : 'Region'}
-          </th>
-        </tr>
-      </thead>
-      <tbody className="bg-white divide-y divide-gray-200">
-        {data.map((user) => (
-          <tr key={user.id} onClick={() => handleRowClick(user)} className="cursor-pointer">
-            <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-              #{user.id.slice(0, 8)}
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {activeTab === 'buyer' ? user.full_name : user.license_number}
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {activeTab === 'buyer' ? user.business_name : user.email || 'N/A'}
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {user.phone}
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {activeTab === 'buyer' ? user.location : user.region}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-
-  const currentData = activeTab === "buyer" ? buyerData : sellerData;
-
-  return (
-    <div className="bg-white rounded-lg shadow">
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex justify-between items-center">
-          <h3 className="text-xl font-semibold text-gray-800">
-            {activeTab === "buyer" ? "Buyer" : "Seller"} Data
-          </h3>
-          <div className="inline-flex h-10 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
-            <div className="flex items-center gap-1 rounded-md bg-gray-100 p-1">
-              <button
-                onClick={() => setActiveTab("buyer")}
-                className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
-                  activeTab === "buyer"
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                Buyer Data ({buyerData.length})
-              </button>
-              <button
-                onClick={() => setActiveTab("seller")}
-                className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
-                  activeTab === "seller"
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                Seller Data ({sellerData.length})
-              </button>
-            </div>
-          </div>
+      {/* Basic Info */}
+      <div className="flex-1 min-w-0">
+        <h3 className="text-lg font-semibold text-gray-900 truncate">
+          {user.business_name || user.name || 'N/A'}
+        </h3>
+        <div className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium
+          ${type === 'sellers' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}
+        >
+          {type === 'sellers' ? 'Seller' : 'Buyer'}
         </div>
       </div>
-      
-      <div className="overflow-x-auto">
-        {currentData.length > 0 ? (
-          renderUsersTable(currentData)
+    </div>
+
+    {/* Contact Details */}
+    <div className="mt-4 space-y-2">
+      <div className="flex items-center text-sm text-gray-500">
+        <Mail className="w-4 h-4 mr-2" />
+        <span className="truncate">{user.email}</span>
+      </div>
+      {user.phone && (
+        <div className="flex items-center text-sm text-gray-500">
+          <Phone className="w-4 h-4 mr-2" />
+          <span>{user.phone}</span>
+        </div>
+      )}
+      {user.region && (
+        <div className="flex items-center text-sm text-gray-500">
+          <MapPin className="w-4 h-4 mr-2" />
+          <span>{user.region}</span>
+        </div>
+      )}
+      {user.business_name && (
+        <div className="flex items-center text-sm text-gray-500">
+          <Building2 className="w-4 h-4 mr-2" />
+          <span>{user.business_name}</span>
+        </div>
+      )}
+    </div>
+
+    {/* Status Indicator */}
+    <div className="mt-4 flex items-center justify-between text-sm">
+      <div className="flex items-center">
+        <div className={`w-2 h-2 rounded-full mr-2 ${user.status === 'inactive' ? 'bg-gray-300' : 'bg-green-500'}`} />
+        <span className="text-gray-500">
+          {user.status === 'inactive' ? 'Inactive' : 'Active'}
+        </span>
+      </div>
+      <span className="text-gray-400 text-xs">
+        ID: #{user.id?.slice(0, 8)}
+      </span>
+    </div>
+  </div>
+);
+
+const Users = () => {
+  const [activeTab, setActiveTab] = useState('buyers');
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await (activeTab === 'buyers' 
+          ? userService.getBuyers()
+          : userService.getSellers()
+        );
+        setUsers(data);
+      } catch (err) {
+        setError('Failed to load users');
+        console.error('Error fetching users:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, [activeTab]);
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-semibold text-gray-900">Users</h1>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setActiveTab('buyers')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors
+              ${activeTab === 'buyers'
+                ? 'bg-blue-100 text-blue-700'
+                : 'text-gray-600 hover:bg-gray-100'
+              }`}
+          >
+            Buyers
+          </button>
+          <button
+            onClick={() => setActiveTab('sellers')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors
+              ${activeTab === 'sellers'
+                ? 'bg-green-100 text-green-700'
+                : 'text-gray-600 hover:bg-gray-100'
+              }`}
+          >
+            Sellers
+          </button>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="min-h-[calc(100vh-12rem)]">
+        {loading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="text-gray-500">Loading users...</div>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+            <UsersIcon className="w-8 h-8 mb-2 text-gray-400" />
+            <p>{error}</p>
+          </div>
+        ) : users.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+            <UsersIcon className="w-8 h-8 mb-2 text-gray-400" />
+            <p>No {activeTab} found</p>
+          </div>
         ) : (
-          <div className="text-center py-6 text-gray-500">
-            No {activeTab} data found
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {users.map(user => (
+              <UserCard 
+                key={user.id} 
+                user={user} 
+                type={activeTab}
+              />
+            ))}
           </div>
         )}
       </div>
-      {selectedUser && <DialogueBox user={selectedUser} onClose={handleCloseDialogue} />}
     </div>
   );
 };
 
-export default UsersPage;
+export default Users;

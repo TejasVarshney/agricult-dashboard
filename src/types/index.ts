@@ -9,11 +9,22 @@ export interface User {
 
 export interface Order {
   id: string;
-  buyerId: string;
-  status: 'active' | 'pending' | 'closed';
+  buyer_id: string;
+  status: 'pending' | 'active' | 'completed';
+  created_at: string;
+  loading_date: string;
+  region: string;
   quantity: number;
   grade: string;
-  region: string;
-  loadingDate: string;
-  createdAt: string;
+  notes?: string;
+  special_requirements?: string;
+}
+
+export interface Bid {
+  id: string;
+  rfq_id: string;
+  seller_id: string;
+  price: number;
+  status: 'pending' | 'accepted' | 'rejected';
+  created_at: string;
 } 

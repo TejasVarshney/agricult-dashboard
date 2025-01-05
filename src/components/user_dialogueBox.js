@@ -1,54 +1,124 @@
-function dialogueBox({ user, onClose }) {
-    return (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-75 backdrop-blur-sm transition-opacity duration-300">
-            <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 hover:scale-[1.02]">
-                <div className="flex items-center mb-6">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                        <span className="text-blue-600 text-xl font-bold">
-                            {(user.full_name || user.userName || 'NA').charAt(0).toUpperCase()}
-                        </span>
-                    </div>
-                    <h2 className="text-2xl font-bold ml-4 text-gray-800">{user.full_name || user.userName || user.id || 'N/A'}</h2>
-                </div>
-                
-                <div className="space-y-4">
-                    <div className="flex items-center p-3 bg-gray-50 rounded-lg">
-                        <svg className="w-5 h-5 text-gray-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        <span className="text-gray-600">{user.email || 'N/A'}</span>
-                    </div>
-                    
-                    <div className="flex items-center p-3 bg-gray-50 rounded-lg">
-                        <svg className="w-5 h-5 text-gray-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                        </svg>
-                        <span className="text-gray-600">{user.phone || 'N/A'}</span>
-                    </div>
-                    
-                    <div className="flex items-center p-3 bg-gray-50 rounded-lg">
-                        <svg className="w-5 h-5 text-gray-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span className="text-gray-600">{user.location || user.region || 'N/A'}</span>
-                    </div>
-                    
-                    <div className="flex items-center p-3 bg-gray-50 rounded-lg">
-                        <div className={`w-2 h-2 rounded-full mr-3 ${user.isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                        <span className="text-gray-600">{user.isOnline ? 'Online' : 'Offline'}</span>
-                    </div>
-                </div>
+import { X } from 'lucide-react';
 
-                <button 
-                    onClick={onClose} 
-                    className="mt-8 w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-medium transition-colors duration-200 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                >
-                    Close
-                </button>
+const UserDialogueBox = ({ isOpen, onClose, onSubmit, initialData = {} }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      {/* Overlay */}
+      <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+
+      {/* Dialog */}
+      <div className="flex min-h-full items-center justify-center p-4">
+        <div className="relative transform overflow-hidden rounded-xl bg-white shadow-xl transition-all w-full max-w-lg">
+          {/* Header */}
+          <div className="bg-gray-50 px-6 py-4 border-b border-gray-100">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {initialData.id ? 'Edit User' : 'Add New User'}
+              </h3>
+              <button
+                onClick={onClose}
+                className="rounded-lg p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
-        </div>
-    );
-}
+          </div>
 
-export default dialogueBox;
+          {/* Form */}
+          <form onSubmit={onSubmit} className="p-6 space-y-6">
+            <div className="space-y-4">
+              {/* Name Field */}
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  id="name"
+                  defaultValue={initialData.name || ''}
+                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+
+              {/* Email Field */}
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  defaultValue={initialData.email || ''}
+                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+
+              {/* Role Selection */}
+              <div>
+                <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+                  Role
+                </label>
+                <select
+                  name="role"
+                  id="role"
+                  defaultValue={initialData.role || 'buyer'}
+                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                >
+                  <option value="buyer">Buyer</option>
+                  <option value="seller">Seller</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+
+              {/* Region Field */}
+              <div>
+                <label htmlFor="region" className="block text-sm font-medium text-gray-700">
+                  Region
+                </label>
+                <select
+                  name="region"
+                  id="region"
+                  defaultValue={initialData.region || ''}
+                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                >
+                  <option value="">Select Region</option>
+                  <option value="North America">North America</option>
+                  <option value="South America">South America</option>
+                  <option value="Europe">Europe</option>
+                  <option value="Asia">Asia</option>
+                  <option value="Africa">Africa</option>
+                  <option value="Oceania">Oceania</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                {initialData.id ? 'Update' : 'Create'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default UserDialogueBox;

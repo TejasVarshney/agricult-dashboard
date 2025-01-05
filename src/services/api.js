@@ -1,6 +1,7 @@
-const API_BASE_URL = 'http://localhost:1234/api';
+const API_BASE_URL = "http://localhost:1234";
 
-export const fetchApi = async (endpoint, options = {}) => {
+// Helper function for API calls
+const fetchApi = async (endpoint, options = {}) => {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
@@ -15,29 +16,42 @@ export const fetchApi = async (endpoint, options = {}) => {
     }
 
     const data = await response.json();
-    return data;
+    return data.data || [];
   } catch (error) {
     console.error('API Request Failed:', error);
     throw error;
   }
 };
 
-export const apiService = {
-  // User related endpoints
-  users: {
-    getBuyers: () => fetchApi('/buyers'),
-    getSellers: () => fetchApi('/sellers'),
-    getBuyerCount: () => fetchApi('/buyers/count'),
-    getSellerCount: () => fetchApi('/sellers/count'),
+export const orderService = {
+  getOrders: () => fetchApi('/api/rfqs'),
+  getBuyerDetails: (buyerId) => fetchApi(`/api/buyers/${buyerId}`),
+  getBidsForOrder: (orderId) => fetchApi(`/api/quotes/rfq/${orderId}`),
+  updateOrderStatus: async (orderId, status) => {
+    const response = await fetchApi(`/api/orders/${orderId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
+    return response;
   },
+  async updateBidStatus(bidId, status) {
+    const response = await fetchApi(`/api/quotes/${bidId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status })
+    });
+    return response;
+  },
+};
 
-  // RFQ related endpoints
-  rfqs: {
-    getAll: () => fetchApi('/rfqs'),
-    getActiveCount: () => fetchApi('/rfqs/count/active'),
-    getEndedCount: () => fetchApi('/rfqs/count/ended'),
-    getTotalCount: () => fetchApi('/rfqs/count/total'),
-    create: (data) => fetchApi('/rfqs', { method: 'POST', body: JSON.stringify(data) }),
-    delete: (id) => fetchApi(`/rfqs/${id}`, { method: 'DELETE' }),
-  },
+export const userService = {
+  getBuyers: () => fetchApi('/api/buyers'),
+  getSellers: () => fetchApi('/api/sellers'),
+  getBuyerCount: () => fetchApi('/api/buyers/count'),
+  getSellerCount: () => fetchApi('/api/sellers/count'),
+};
+
+// For backward compatibility
+export const apiService = {
+  users: userService,
+  orders: orderService,
 }; 

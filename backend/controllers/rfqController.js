@@ -106,4 +106,57 @@ export const getRfqById = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+};
+
+export const getPendingRfqs = async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("rfqs")
+      .select(`
+        *,
+        buyer:buyer_profiles(*)
+      `)
+      .eq("status", "pending")
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    if (error) throw error;
+    res.json({ data });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const updateRfqStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    console.log('Updating RFQ status:', { id, status });
+
+    const { data, error } = await supabase
+      .from("rfqs")
+      .update({ 
+        status,
+        updated_at: new Date().toISOString() 
+      })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase error:', error);
+      throw error;
+    }
+    
+    if (!data) {
+      return res.status(404).json({ error: "RFQ not found" });
+    }
+
+    console.log('RFQ updated successfully:', data);
+    res.json({ data });
+  } catch (error) {
+    console.error('Error updating RFQ status:', error);
+    res.status(500).json({ error: error.message });
+  }
 }; 
